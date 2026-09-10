@@ -1,14 +1,42 @@
 import { CONSENT_KEY, parseConsent } from './state.mjs';
+import { contactConfig } from './contact-config.mjs';
+import { submitContact } from './contact.mjs';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const menu = document.querySelector('#mobile-menu');
 const toggle = document.querySelector('.menu-toggle');
+const menuDock = document.querySelector('.menu-dock');
 const contact = document.querySelector('#contact-dialog');
 const cookieDialog = document.querySelector('#cookie-dialog');
 const banner = document.querySelector('.cookie-banner');
 const dialogStates = new WeakMap();
 let savedY = 0;
 let bodyLocked = false;
+
+function positionMenuToggle() {
+  const box = menuDock.getBoundingClientRect();
+  if (!box.width) return;
+  toggle.style.left = `${box.left}px`;
+  toggle.style.top = `${box.top}px`;
+}
+
+function setMenuIcon(expanded) {
+  toggle.setAttribute('aria-expanded', String(expanded));
+  toggle.setAttribute('aria-label', expanded ? 'Закрыть меню' : 'Открыть меню');
+}
+
+function waitForClosing(dialog) {
+  if (reducedMotion.matches) return Promise.resolve();
+  const target = dialog === menu ? dialog.querySelector('.mobile-menu-panel') : dialog;
+  const duration = Math.max(...getComputedStyle(target).transitionDuration.split(',').map(value => parseFloat(value) * (value.trim().endsWith('ms') ? 1 : 1000)));
+  return new Promise(resolve => {
+    let timer;
+    const finish = () => { clearTimeout(timer); target.removeEventListener('transitionend', onEnd); resolve(); };
+    const onEnd = event => { if(event.target === target && event.propertyName === 'transform') finish(); };
+    target.addEventListener('transitionend',onEnd);
+    timer = setTimeout(finish,duration + 50);
+  });
+}
 
 function lockScroll() {
   if (bodyLocked) return;
@@ -37,11 +65,17 @@ function openDialog(dialog, opener) {
   dialogStates.set(dialog, { opener, closing: null });
   if(dialog === cookieDialog) dialog.querySelector('.storage-status').textContent = '';
   lockScroll();
+  if(dialog === menu) {
+    positionMenuToggle();
+    menu.append(toggle);
+  }
   dialog.showModal();
   dialog.scrollTop = 0;
-  if (dialog === menu) toggle.setAttribute('aria-expanded', 'true');
   requestAnimationFrame(() => requestAnimationFrame(() => {
-    if (dialog.open && !dialogStates.get(dialog)?.closing) dialog.classList.add('is-visible');
+    if (dialog.open && !dialogStates.get(dialog)?.closing) {
+      dialog.classList.add('is-visible');
+      if(dialog === menu) setMenuIcon(true);
+    }
   }));
   const focusTarget = dialog === contact ? dialog.querySelector('input') : dialog.querySelector('button');
   focusTarget?.focus({ preventScroll:true });
@@ -52,10 +86,14 @@ function closeDialog(dialog, restoreFocus = true) {
   const state = dialogStates.get(dialog) || {};
   if (state.closing) return state.closing;
   dialog.classList.remove('is-visible');
-  const promise = new Promise(resolve => {
-    window.setTimeout(() => {
+  if(dialog === menu) setMenuIcon(false);
+  const promise = waitForClosing(dialog).then(() => {
       dialog.close();
-      if (dialog === menu) toggle.setAttribute('aria-expanded', 'false');
+      if (dialog === menu) {
+        menuDock.append(toggle);
+        toggle.style.removeProperty('left');
+        toggle.style.removeProperty('top');
+      }
       unlockScroll();
       if (restoreFocus) {
         const openerVisible = state.opener?.isConnected && state.opener.getClientRects().length;
@@ -64,8 +102,6 @@ function closeDialog(dialog, restoreFocus = true) {
         focusTarget?.focus({preventScroll:true});
       }
       dialogStates.delete(dialog);
-      resolve();
-    }, reducedMotion.matches ? 0 : 380);
   });
   state.closing = promise;
   dialogStates.set(dialog, state);
@@ -81,12 +117,13 @@ document.querySelectorAll('dialog').forEach(dialog => {
     const box = dialog.getBoundingClientRect();
     return event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom;
   };
-  dialog.addEventListener('pointerdown', event => { startedOutside = event.target === dialog && outside(event); });
+  dialog.addEventListener('pointerdown', event => { startedOutside = event.target === dialog && (dialog === menu || outside(event)); });
   dialog.addEventListener('click', event => {
-    if (startedOutside && event.target === dialog && outside(event)) closeDialog(dialog);
+    if (startedOutside && event.target === dialog && (dialog === menu || outside(event))) closeDialog(dialog);
     startedOutside = false;
   });
 });
+window.addEventListener('resize', () => { if(menu.open) positionMenuToggle(); });
 
 document.querySelectorAll('[data-contact]').forEach(link => {
   link.addEventListener('click', event => {
@@ -145,22 +182,51 @@ document.querySelector('[data-cookie-clear]')?.addEventListener('click', () => {
 window.addEventListener('storage', event => { if(event.key===CONSENT_KEY || event.key===null) banner.hidden=Boolean(readChoice()); });
 
 const form = document.querySelector('#contact-form');
+let submitting = false;
 form?.addEventListener('input', event => {
   event.target.setCustomValidity?.('');
   document.querySelector('#form-status').textContent = '';
 });
 form?.addEventListener('submit', async event => {
   event.preventDefault();
+  if(submitting) return;
   const name = form.elements.name;
   if(!name.value.trim()) { name.setCustomValidity('Укажите ваше имя.'); name.reportValidity(); return; }
   const message = form.elements.message;
   if(message.value.trim().length<10) { message.setCustomValidity('Опишите задачу чуть подробнее: минимум 10 символов.'); message.reportValidity(); return; }
   if(!form.reportValidity()) return;
   const values = new FormData(form);
-  const text = `Обращение в ART OF ASKING QUESTIONS\n\nИмя: ${values.get('name').trim()}\nПочта: ${values.get('email').trim()}\nКомпания: ${values.get('company').trim() || 'Не указана'}\n\nЗадача:\n${values.get('message').trim()}`;
+  const payload = {
+    name: values.get('name').trim(),
+    email: values.get('email').trim(),
+    company: values.get('company').trim(),
+    message: values.get('message').trim(),
+    consent: values.get('consent') === 'on'
+  };
   const status = document.querySelector('#form-status');
+  const button = form.querySelector('button[type="submit"]');
+  const originalLabel = button.innerHTML;
+  const controls = [...form.querySelectorAll('input, textarea, button[type="submit"]')];
+  submitting = true;
+  controls.forEach(control => { control.disabled = true; });
+  form.setAttribute('aria-busy', 'true');
+  button.textContent = 'Отправляем…';
+  status.textContent = '';
+  status.removeAttribute('data-state');
   try {
-    await navigator.clipboard.writeText(text);
-    status.textContent = 'Текст скопирован. Заявка не отправлена: передайте текст через согласованный с компанией канал связи.';
-  } catch { status.textContent = 'Не удалось скопировать автоматически. Можно выделить и скопировать заполненные поля вручную. Заявка не отправлена.'; }
+    await submitContact(payload, contactConfig);
+    form.reset();
+    form.querySelector('.optional-company').open = false;
+    status.dataset.state = 'success';
+    status.textContent = 'Заявка отправлена. Спасибо за обращение!';
+  } catch {
+    status.dataset.state = 'error';
+    status.textContent = 'Не удалось отправить заявку. Попробуйте ещё раз.';
+  } finally {
+    controls.forEach(control => { control.disabled = false; });
+    button.innerHTML = originalLabel;
+    form.removeAttribute('aria-busy');
+    submitting = false;
+    if(contact.open) button.focus({preventScroll:true});
+  }
 });

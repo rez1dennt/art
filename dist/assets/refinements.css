@@ -1,0 +1,79 @@
+/* Focused refinements: continuous menu control, compact dialogs and clear imagery. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.menu-dock{display:none;width:48px;height:48px;flex-shrink:0}
+.menu-toggle{transition:background .3s,border-color .3s}
+.menu-toggle span{width:20px;left:13px;height:1.5px;transform-origin:center;transition:top .24s var(--ease),transform .34s var(--ease),opacity .18s ease,background .25s}
+.menu-toggle span:nth-child(1){top:16px}
+.menu-toggle span:nth-child(2){top:23px}
+.menu-toggle span:nth-child(3){top:30px}
+.menu-toggle[aria-expanded="true"]{background:var(--pine);border-color:var(--pine)}
+.menu-toggle[aria-expanded="true"] span{background:var(--paper)}
+.menu-toggle[aria-expanded="true"] span:nth-child(1){top:23px;transform:rotate(45deg)}
+.menu-toggle[aria-expanded="true"] span:nth-child(2){opacity:0;transform:scaleX(.3)}
+.menu-toggle[aria-expanded="true"] span:nth-child(3){top:23px;transform:rotate(-45deg)}
+.mobile-menu,.mobile-menu.is-visible{inset:0;margin:0;padding:0;width:100%;height:100dvh;max-width:none;max-height:none;border-radius:0;background:transparent;box-shadow:none;opacity:1;transform:none;transition:none;overflow:hidden}
+.mobile-menu-panel{background:var(--stone);border-radius:0 0 28px 28px;max-height:calc(100dvh - 12px);overflow:auto;overscroll-behavior:contain;transform:translateY(calc(-100% - 16px));transition:transform 440ms var(--ease);padding-bottom:30px;box-shadow:0 20px 50px #123f361c}
+.mobile-menu.is-visible .mobile-menu-panel{transform:translateY(0)}
+.mobile-menu>.menu-toggle{display:block;position:fixed;z-index:2}
+.mobile-menu .menu-top{height:var(--header-height);min-height:var(--header-height);padding:0 var(--gutter);margin:0;gap:20px}
+.menu-close-space{display:block;width:48px;height:48px;flex-shrink:0}
+.mobile-menu nav{margin:12px 32px 22px;gap:0}
+.mobile-menu nav a{font-size:27px;letter-spacing:-.035em;padding:15px 0}
+.mobile-menu nav a:last-child{margin-top:16px;background:var(--pine);color:var(--paper);border:0;border-radius:99px;padding:14px 20px;font-size:19px;display:flex;align-items:center;justify-content:space-between}
+.mobile-menu .menu-bottom{margin:0 32px;font-size:24px!important;line-height:1.2}
+.image-caption{color:var(--pine);font-weight:500;background:rgba(245,244,238,.96);border-radius:14px;padding:14px 17px;right:28px;top:28px;max-width:190px;letter-spacing:.055em;line-height:1.65;font-size:12px;box-shadow:0 2px 14px #123f360b}
+.optional-company{margin:4px 0 16px}
+.optional-company summary{display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-size:14px;min-height:32px;color:var(--pine);list-style:none}
+.optional-company summary::-webkit-details-marker{display:none}
+.optional-company summary span{font-size:20px;transition:transform .2s}
+.optional-company[open] summary span{transform:rotate(45deg)}
+.optional-company[open] label{margin-top:8px}
+.optional-company summary:focus-visible{outline:3px solid #487a57;outline-offset:3px;border-radius:4px}
+.contact-dialog .form-note{font-size:13px;line-height:1.45;margin:14px 0}
+.contact-dialog label.consent-control{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.5;margin:14px 0}
+.contact-dialog .consent-control input{appearance:auto;accent-color:var(--pine);width:18px;height:18px;min-height:18px;margin:1px 0 0;padding:0;flex-shrink:0;border-radius:3px}
+.consent-control a{text-decoration:underline;text-underline-offset:3px}
+.contact-dialog button[type="submit"]{min-width:230px}
+.contact-dialog button[type="submit"]:disabled{opacity:.7;cursor:wait}
+#form-status[data-state="error"]{color:#843f2c}
+@media(max-width:1000px){.menu-dock{display:inline-flex}}
+@media(max-width:700px){
+  .mobile-menu .menu-top{padding-inline:20px}
+  .mobile-menu nav{margin:10px 24px 20px}
+  .mobile-menu nav a{font-size:25px;padding:14px 0}
+  .mobile-menu nav a:last-child{font-size:17px;padding:13px 18px;margin-top:14px;min-height:48px}
+  .mobile-menu .menu-bottom{margin-inline:24px;font-size:23px!important}
+  .mobile-menu-panel{padding-bottom:26px}
+  .contact-dialog,.cookie-dialog{padding:20px;max-height:calc(100dvh - 32px);width:460px}
+  .contact-dialog .dialog-heading,.cookie-dialog .dialog-heading{margin-bottom:5px}
+  .contact-dialog .close-button,.cookie-dialog .close-button{height:38px;width:38px;font-size:27px}
+  .contact-dialog h2{font-size:28px;line-height:1.13;letter-spacing:-.035em;margin-bottom:17px}
+  .contact-dialog .dialog-intro{display:none}
+  .contact-dialog label{font-size:13px;margin-bottom:11px;line-height:1.4}
+  .contact-dialog input{min-height:44px;height:44px;margin-top:5px;padding:9px 12px;font-size:16px}
+  .contact-dialog textarea{min-height:76px;height:76px;margin-top:5px;padding:9px 12px;font-size:16px;line-height:1.4}
+  .contact-dialog .optional-company{margin:0 0 9px}
+  .contact-dialog .optional-company summary{font-size:12px;min-height:28px}
+  .contact-dialog .form-note{font-size:12px;line-height:1.4;margin:10px 0 12px}
+  .contact-dialog .button{min-height:46px;padding:11px 16px;font-size:14px}
+  .contact-dialog .form-legal{font-size:11px!important;line-height:1.5;margin-top:11px}
+  .cookie-dialog h2{font-size:28px;line-height:1.15;letter-spacing:-.035em;margin-bottom:14px}
+  .cookie-dialog>p{font-size:13px;line-height:1.5}
+  .cookie-dialog .cookie-category{padding:15px 0;gap:9px}
+  .cookie-category strong{font-size:14px}
+  .cookie-dialog .cookie-category p{font-size:12px;line-height:1.5;margin-top:4px}
+  .cookie-dialog .tag{font-size:11px;padding:5px 9px}
+  .cookie-dialog>.button{margin-top:18px;min-height:46px;padding:11px 15px}
+  .cookie-dialog .clear-cookie{font-size:12px;margin:5px 0;min-height:36px;padding:6px 0}
+  .cookie-dialog .fine-link{font-size:12px}
+}
+@media(max-width:360px){
+  .mobile-menu nav a{font-size:24px}
+  .contact-dialog h2{font-size:27px}
+  .contact-dialog,.cookie-dialog{padding:18px}
+}
+@media(prefers-reduced-motion:reduce){
+  .mobile-menu-panel{transform:none;opacity:0;transition:none}
+  .mobile-menu.is-visible .mobile-menu-panel{opacity:1}
+  .menu-toggle,.menu-toggle span{transition:none}
+}
