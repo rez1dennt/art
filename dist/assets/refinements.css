@@ -77,3 +77,41 @@
   .mobile-menu.is-visible .mobile-menu-panel{opacity:1}
   .menu-toggle,.menu-toggle span{transition:none}
 }
+
+/* Manrope carries reading and navigation; Georgia remains the restrained serif accent. */
+:root{--font-body:Manrope,Arial,sans-serif;--font-accent:Georgia,'Times New Roman',serif}
+body{font-family:var(--font-body)}
+.metric-number,.product-mark,.service-economics b,.closing-cta h2,.statement h2,.menu-bottom{font-family:var(--font-accent)}
+.hero h1{letter-spacing:-.035em;line-height:1.1}
+.hero-title-lead,.hero-title-follow{display:block;text-wrap:balance}
+.hero-title-lead{max-width:14ch}
+.keep-together{white-space:nowrap}
+.hero-description{letter-spacing:-.012em}
+.hero-description p{line-height:1.45;text-wrap:balance;max-width:100%}
+.hero-description p+p{margin-top:4px}
+.service-card h3{letter-spacing:-.025em;text-wrap:balance}
+.service-description{letter-spacing:-.012em;text-wrap:balance}
+.system-row{grid-template-columns:36px 1.05fr 1.3fr}
+.system-row:hover h3{text-decoration:underline;text-underline-offset:4px}
+@media(max-width:1200px){.system-row{grid-template-columns:25px 1fr 1fr}}
+@media(max-width:1000px){
+  .system-row{grid-template-columns:25px 1fr}
+  .hero h1{font-size:43px}
+  .service-card .service-title-compact{font-size:clamp(24px,3vw,30px)}
+}
+@media(max-width:700px){
+  .hero h1{font-size:clamp(29px,7.4vw,45px);line-height:1.13;letter-spacing:-.032em}
+  .hero-title-follow{margin-top:5px}
+  .hero-title-lead{max-width:none}
+  .hero-description{font-size:17px;max-width:34ch}
+  .hero-description p{text-wrap:balance}
+  .hero-description p+p{margin-top:7px}
+  .service-card .service-title-compact{font-size:clamp(23px,5.9vw,33px);white-space:nowrap;letter-spacing:-.025em}
+  .service-description{font-size:16px;line-height:1.5}
+  .system-row{grid-template-columns:25px 1fr}
+  .detail-hero h1{font-size:clamp(30px,7.4vw,42px);letter-spacing:-.03em;line-height:1.13;text-wrap:balance}
+}
+@media(max-width:360px){
+  .hero h1{font-size:28px}
+  .hero-description{font-size:16px}
+}

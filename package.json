@@ -3,5 +3,5 @@
   "version":"1.0.0",
   "private":true,
   "description":"Static HTML, CSS and vanilla JavaScript advisory website",
-  "scripts":{"build":"node scripts/build.mjs","test":"node --test qa/site.test.mjs qa/interactions.test.cjs qa/mobile-refinement.test.mjs qa/contact.test.mjs","dev":"node scripts/serve.mjs"}
+  "scripts":{"build":"node scripts/build.mjs","test":"node --test qa/site.test.mjs qa/interactions.test.cjs qa/mobile-refinement.test.mjs qa/contact.test.mjs qa/release-config.test.mjs","dev":"node scripts/serve.mjs"}
 }
