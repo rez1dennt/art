@@ -1,0 +1,7 @@
+{
+  "name":"art-of-asking-questions",
+  "version":"1.0.0",
+  "private":true,
+  "description":"Static HTML, CSS and vanilla JavaScript advisory website",
+  "scripts":{"build":"node scripts/build.mjs","test":"node --test qa/site.test.mjs qa/interactions.test.cjs","dev":"node scripts/serve.mjs"}
+}
