@@ -1,13 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync,readdirSync} from 'node:fs';
-test('Vercel serves the directory emitted by the static build',()=>{
-  assert.ok(existsSync('vercel.json'),'Missing Vercel output configuration');
-  const config=JSON.parse(readFileSync('vercel.json','utf8'));
-  assert.equal(config.outputDirectory,'dist');
-  assert.equal(config.buildCommand,'npm run build');
-  assert.equal(config.framework,null);
-  assert.ok(existsSync(`${config.outputDirectory}/index.html`));
+test('Static build emits homepage and service routes',()=>{
+  for(const route of ['index.html','diagnostika/index.html','strategiya/index.html']) {
+    assert.ok(existsSync(`dist/${route}`),`Missing static route: ${route}`);
+  }
 });
 test('No decorative arrows or forced money-only headline remain',()=>{
   const files=readdirSync('dist',{recursive:true}).filter(f=>f.endsWith('.html'));
